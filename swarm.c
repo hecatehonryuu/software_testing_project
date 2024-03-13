@@ -10,8 +10,8 @@ const u32 max = 100000000; //100mil = 100%
 /* Essentially does the same thing as and replaces the switch part of original havoc stage
 Instead of a uniform distribution, it uses the provided swarm distribution to select mutation operators*/
 int swarm_havoc(u32** swarm) {
-    int rand = random() % max; 
-    // int rand = UR(max + 1); 
+    // int rand = random() % max; 
+    int rand = UR(max + 1); 
     for (int i = 0; i < 15; i++) {
         if (rand < swarm[i][0]) {
             return i;
