@@ -42,6 +42,7 @@
 #include "debug.h"
 #include "alloc-inl.h"
 #include "hash.h"
+#include "swarm.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -7775,7 +7776,7 @@ static void save_cmdline(u32 argc, char** argv) {
 
 /* Main entry point */
 
-int main(int argc, char** argv) {
+int main123(int argc, char** argv) {
 
   s32 opt;
   u64 prev_queued = 0;
@@ -8192,6 +8193,33 @@ stop_fuzzing:
 
   exit(0);
 
+}
+
+int main(int argc, char** argv) {
+    u32 x = 100000000/10;
+    u32** swarm = (u32**)malloc(15 * sizeof(u32*));
+    for (int i = 0; i < 15; i++) {
+        swarm[i] = (u32*)malloc(2 * sizeof(u32));
+        swarm[i][0] = x;
+    }
+
+    int** array = (int**)malloc(15 * sizeof(int*));
+    for (int i = 0; i < 15; i++) {
+        array[i] = (int*)malloc(2 * sizeof(int));
+        array[i][0] = 0;
+    }
+
+    for (int i = 0; i < 10000; i++) {
+        int mutoper = swarm_havoc(swarm);
+        array[mutoper][0]++;
+    }
+    
+    for (int i = 0; i < 15; i++) {
+        printf("%d, ", array[i][0]);
+    }
+    printf("\n");
+
+    exit(0);
 }
 
 #endif /* !AFL_LIB */
