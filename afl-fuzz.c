@@ -8196,11 +8196,12 @@ stop_fuzzing:
 }
 
 int main(int argc, char** argv) {
+    swarm target;
     u32 x = 100000000/10;
-    u32** swarm = (u32**)malloc(15 * sizeof(u32*));
+    target.distribution = (u32**)malloc(15 * sizeof(u32*));
     for (int i = 0; i < 15; i++) {
-        swarm[i] = (u32*)malloc(2 * sizeof(u32));
-        swarm[i][0] = x;
+        target.distribution[i] = (u32*)malloc(2 * sizeof(u32));
+        target.distribution[i][0] = x;
     }
 
     int** array = (int**)malloc(15 * sizeof(int*));
@@ -8210,7 +8211,7 @@ int main(int argc, char** argv) {
     }
 
     for (int i = 0; i < 10000; i++) {
-        int mutoper = swarm_havoc(swarm);
+        int mutoper = swarm_havoc(&target);
         array[mutoper][0]++;
     }
     

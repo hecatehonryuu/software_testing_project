@@ -7,30 +7,33 @@
 
 const u32 max = 100000000; //100mil = 100%
 
+
+
 /* Initialise all variables required to store swarms and data required for optimisation
 Arguments are pointers defined in the main func??? */
-void init_swarm()
+// void init_swarm()
 
 /* Essentially does the same thing as and replaces the switch part of original havoc stage
 Instead of a uniform distribution, it uses the provided swarm distribution to select mutation operators*/
-int swarm_havoc(u32** swarm) {
-    // int rand = random() % max; 
-    int rand = UR(max + 1); 
+int swarm_havoc(swarm* target) {
+    u32** distribution = target->distribution;
+    int rand = random() % max; 
+    // int rand = UR(max + 1); 
     for (int i = 0; i < 15; i++) {
-        if (rand < swarm[i][0]) {
+        if (rand < distribution[i][0]) {
             return i;
         }
-        rand -= swarm[i][0];
+        rand -= distribution[i][0];
     }
     return -1;
 }
 
 /* Select best swarm to be used for havoc stage, returns best swarm?*/
-u32** compare_swarm()
+// u32** compare_swarm()
 
 /* Optimise the swarms
 arguments?*/
-void optimise_swarm()
+// void optimise_swarm()
 
 /* TODO figure out how to gather is_interesting data per swarm, func? edit to main func??*/
 
