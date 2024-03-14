@@ -7,17 +7,17 @@
 
 const u32 max = 100000000; //100mil = 100%
 
-swarm** init_swarm_collection(){
+particle** init_swarm_collection(){
     //TODO
     return NULL;
 }
 
-swarm* init_swarm(){
-    //TODO
+particle* init_swarm(){
+    //TODO may need to take arg to allow randomisation of initial distribution?
     return NULL;
 }
 
-int swarm_havoc(swarm* target) {
+int swarm_havoc(particle* target) {
     u32** distribution = target->distribution;
     int rand = random() % max; 
     // int rand = UR(max + 1); 
@@ -30,18 +30,18 @@ int swarm_havoc(swarm* target) {
     return -1;
 }
 
-swarm* compare_swarm(swarm** collection){
+particle* compare_swarm(particle** swarm){
     //TODO
     return NULL;
 }
 
-void update_localbest(swarm** collection){
+void update_localbest(particle** swarm){
     //TODO
     return NULL;
 }
 
-void optimise(swarm** collection){
-    //TODO
+void optimise(particle** swarm){
+    //TODO 
     return NULL;
 }
 
