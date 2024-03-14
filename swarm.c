@@ -7,14 +7,16 @@
 
 const u32 max = 100000000; //100mil = 100%
 
+swarm** init_swarm_collection(){
+    //TODO
+    return NULL;
+}
 
+swarm* init_swarm(){
+    //TODO
+    return NULL;
+}
 
-/* Initialise all variables required to store swarms and data required for optimisation
-Arguments are pointers defined in the main func??? */
-// void init_swarm()
-
-/* Essentially does the same thing as and replaces the switch part of original havoc stage
-Instead of a uniform distribution, it uses the provided swarm distribution to select mutation operators*/
 int swarm_havoc(swarm* target) {
     u32** distribution = target->distribution;
     int rand = random() % max; 
@@ -28,14 +30,20 @@ int swarm_havoc(swarm* target) {
     return -1;
 }
 
-/* Select best swarm to be used for havoc stage, returns best swarm?*/
-// u32** compare_swarm()
+swarm* compare_swarm(swarm** collection){
+    //TODO
+    return NULL;
+}
 
-/* Optimise the swarms
-arguments?*/
-// void optimise_swarm()
+void update_localbest(swarm** collection){
+    //TODO
+    return NULL;
+}
 
-/* TODO figure out how to gather is_interesting data per swarm, func? edit to main func??*/
+void optimise(swarm** collection){
+    //TODO
+    return NULL;
+}
 
 /*
 int main () {
