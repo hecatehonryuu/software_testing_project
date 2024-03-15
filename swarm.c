@@ -5,24 +5,56 @@
 #include "types.h"
 #include "swarm.h"
 
-const u32 max = 100000000; //100mil = 100%
+const u32 max = 100000000; // 100mil = 100%
 
-particle** init_swarm_collection(){
-    //TODO
-    return NULL;
+swarm **init_swarm_collection()
+{
+    swarm **swarm_collection = (swarm **)malloc(10 * sizeof(swarm *));
+    for (int i = 0; i < 10; i++)
+    {
+        swarm_collection[i] = init_swarm(i); // Initialize each swarm in the collection
+    }
+    return swarm_collection;
 }
 
-particle* init_swarm(){
-    //TODO may need to take arg to allow randomisation of initial distribution?
-    return NULL;
+swarm *init_swarm(int seed)
+{
+    swarm *new_swarm = (swarm *)malloc(sizeof(swarm));
+    new_swarm->distribution = (u32 **)malloc(15 * sizeof(u32 *));
+    new_swarm->localbest = (u32 **)malloc(15 * sizeof(u32 *));
+    new_swarm->velocity = (u32 **)malloc(15 * sizeof(u32 *));
+    new_swarm->score = 0;
+    new_swarm->bestscore = 0;
+    new_swarm->weights = 0.5;
+
+    srand(seed); // Set the seed for random number generation
+
+    u32 total = 0;
+    for (int i = 0; i < 15; i++)
+    {
+        new_swarm->distribution[i] = (u32 *)malloc(sizeof(u32));
+        new_swarm->distribution[i][0] = rand() % max; // Generate a random distribution probability
+        total += new_swarm->distribution[i][0];
+    }
+
+    // Normalize the distribution probabilities to sum up to max
+    for (int i = 0; i < 15; i++)
+    {
+        new_swarm->distribution[i][0] = (new_swarm->distribution[i][0] * max) / total;
+    }
+
+    return new_swarm;
 }
 
-int swarm_havoc(particle* target) {
-    u32** distribution = target->distribution;
-    int rand = random() % max; 
-    // int rand = UR(max + 1); 
-    for (int i = 0; i < 15; i++) {
-        if (rand < distribution[i][0]) {
+int swarm_havoc(swarm *target)
+{
+    u32 **distribution = target->distribution;
+    int rand = random() % max;
+    // int rand = UR(max + 1);
+    for (int i = 0; i < 15; i++)
+    {
+        if (rand < distribution[i][0])
+        {
             return i;
         }
         rand -= distribution[i][0];
@@ -30,18 +62,31 @@ int swarm_havoc(particle* target) {
     return -1;
 }
 
-particle* compare_swarm(particle** swarm){
-    //TODO
-    return NULL;
+swarm *compare_swarm(swarm **swarm_collection)
+{
+    // initialize best_swarm to the first swarm in the collection
+    swarm *best_swarm = swarm_collection[0];
+
+    // iterate through all the swarms in swarm_collection and compare their scores
+    // Update the best swarm if a higher score is found
+    for (int i = 1; swarm_collection[i] != NULL; i++)
+    {
+        if (swarm_collection[i]->bestscore > best_swarm->bestscore)
+        {
+            best_swarm = swarm_collection[i];
+        }
+    }
+
+    return best_swarm;
 }
 
-void update_localbest(particle** swarm){
-    //TODO
-    return NULL;
+void update_localbest(swarm *swarm)
+{
 }
 
-void optimise(particle** swarm){
-    //TODO 
+void optimise(swarm *swarm)
+{
+    // TODO
     return NULL;
 }
 
@@ -64,7 +109,7 @@ int main () {
         int mutoper = swarm_havoc(swarm);
         array[mutoper][0]++;
     }
-    
+
     for (int i = 0; i < 15; i++) {
         printf("%d, ", array[i][0]);
     }
