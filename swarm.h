@@ -12,6 +12,8 @@ typedef struct leswarm
 
     u32 **velocity; /* an array storing the velocity of each mutator */
 
+    u32 **mutscore; /* an array storing the score of each mutator */
+
     u8 score; /* total score */
 
     u8 bestscore;
@@ -48,6 +50,9 @@ void update_velocity(swarm *swarm);
 
 /* update the distribution probability of every mutator in swarm */
 void update_distribution(swarm *swarm);
+
+/* compare the localbest of all mutators in every swarm and update the global best with the localbest that has the highest score*/
+void update_globalbest(swarm **swarm_collection);
 
 /* Optimise and Update distributions for all swarms
 Obtain gbest (distribution) by comparing swarms,

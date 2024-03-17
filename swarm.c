@@ -6,7 +6,10 @@
 #include "swarm.h"
 
 const u32 max = 100000000; // 100mil = 100%
-int global_best = 0;       // initialize Global variable to store global best
+
+/* a dobule array containing the global best distribution probability and its corresponding score for each mutator.
+    The first element of each array in global_best is the global best distribution probability and the second element is its corresponding score */
+u32 global_best[15][2];
 
 swarm **init_swarm_collection()
 {
@@ -27,6 +30,7 @@ swarm *init_swarm(int seed)
     new_swarm->distribution = (u32 **)malloc(15 * sizeof(u32 *));
     new_swarm->localbest = (u32 **)malloc(15 * sizeof(u32 *));
     new_swarm->velocity = (u32 **)malloc(15 * sizeof(u32 *));
+    new_swarm->mutscore = (u32 **)malloc(15 * sizeof(u32 *));
     new_swarm->score = 0;
     new_swarm->bestscore = 0;
     new_swarm->weights = 0.5;
@@ -108,7 +112,7 @@ void update_velocity(swarm *swarm)
 {
     for (int i = 0; i < 15; i++)
     {
-        swarm->velocity[i][0] = (u32)(swarm->weights * swarm->velocity[i][0] + swarm->rand_displacement * (swarm->localbest[i][0] - swarm->distribution[i][0]) + swarm->rand_displacement * (global_best - swarm->distribution[i][0]));
+        swarm->velocity[i][0] = (u32)(swarm->weights * swarm->velocity[i][0] + swarm->rand_displacement * (swarm->localbest[i][0] - swarm->distribution[i][0]) + swarm->rand_displacement * (global_best[i][0] - swarm->distribution[i][0]));
     }
 }
 
@@ -117,6 +121,28 @@ void update_distribution(swarm *swarm)
     for (int i = 0; i < 15; i++)
     {
         swarm->distribution[i][0] += swarm->velocity[i][0];
+    }
+}
+
+void update_globalbest(swarm **swarm_collection)
+{
+    for (int i = 0; i < 15; i++)
+    {
+        global_best[i][0] = swarm_collection[0]->localbest[i][0]; /* set the first element of each array in global_best as the local best values of the first swarm */
+        global_best[i][1] = swarm_collection[0]->mutscore[i][0];  /* set the second element of each array in global_best as the mutscore values of the first swarm */
+    }
+
+    // compare all the swarms and update the global best values for each mutator
+    for (int i = 1; swarm_collection[i] != NULL; i++)
+    {
+        for (int j = 0; j < 15; j++)
+        {
+            if (swarm_collection[i]->mutscore[j][0] > global_best[j][1])
+            {
+                global_best[j][0] = swarm_collection[i]->localbest[j][0];
+                global_best[j][1] = swarm_collection[i]->mutscore[j][0];
+            }
+        }
     }
 }
 
