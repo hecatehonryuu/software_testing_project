@@ -6,6 +6,7 @@
 #include "swarm.h"
 
 const u32 max = 100000000; // 100mil = 100%
+int global_best = 0;       // initialize Global variable to store global best
 
 swarm **init_swarm_collection()
 {
@@ -19,6 +20,9 @@ swarm **init_swarm_collection()
 
 swarm *init_swarm(int seed)
 {
+    const float min_value = 0.0;
+    const float max_value = 1.0;
+
     swarm *new_swarm = (swarm *)malloc(sizeof(swarm));
     new_swarm->distribution = (u32 **)malloc(15 * sizeof(u32 *));
     new_swarm->localbest = (u32 **)malloc(15 * sizeof(u32 *));
@@ -26,6 +30,7 @@ swarm *init_swarm(int seed)
     new_swarm->score = 0;
     new_swarm->bestscore = 0;
     new_swarm->weights = 0.5;
+    new_swarm->rand_displacement = min_value + ((max_value - min_value) * ((float)rand() / RAND_MAX)); // generate a random number between 0 and 1
 
     srand(seed); // Set the seed for random number generation
 
@@ -82,6 +87,37 @@ swarm *compare_swarm(swarm **swarm_collection)
 
 void update_localbest(swarm *swarm)
 {
+    if (swarm->score > swarm->bestscore)
+    {
+        for (int i = 0; i < 15; i++)
+        {
+            swarm->localbest[i][0] = swarm->distribution[i][0];
+        }
+    }
+}
+
+void update_bestscore(swarm *swarm)
+{
+    if (swarm->score > swarm->bestscore)
+    {
+        swarm->bestscore = swarm->score;
+    }
+}
+
+void update_velocity(swarm *swarm)
+{
+    for (int i = 0; i < 15; i++)
+    {
+        swarm->velocity[i][0] = (u32)(swarm->weights * swarm->velocity[i][0] + swarm->rand_displacement * (swarm->localbest[i][0] - swarm->distribution[i][0]) + swarm->rand_displacement * (global_best - swarm->distribution[i][0]));
+    }
+}
+
+void update_distribution(swarm *swarm)
+{
+    for (int i = 0; i < 15; i++)
+    {
+        swarm->distribution[i][0] += swarm->velocity[i][0];
+    }
 }
 
 void optimise(swarm *swarm)
