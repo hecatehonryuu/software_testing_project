@@ -8,13 +8,12 @@
 const u32 max = 100000000; // 100mil = 100%
 const int numswarms = 10;
 
-
 swarm **init_swarm_collection()
 {
     swarm **swarm_collection = (swarm **)malloc(numswarms * sizeof(swarm *));
     for (int i = 0; i < numswarms; i++)
     {
-        swarm_collection[i] = init_swarm(i); // Initialize each swarm in the collection
+        swarm_collection[i] = init_swarm(i + 1); // Initialize each swarm in the collection
     }
     return swarm_collection;
 }
@@ -27,21 +26,21 @@ swarm *init_swarm(int seed)
     new_swarm->velocity = (u32 **)malloc(15 * sizeof(u32 *));
     new_swarm->score = 0;
     new_swarm->bestscore = 0;
-    new_swarm->weights = 0.5; //TODO to determine weight to use, verify math works correctly with floats and u32
-    srand(seed); // Set the seed for random number generation
+    new_swarm->weights = 0.5; // TODO to determine weight to use, verify math works correctly with floats and u32
+    srand(seed);              // Set the seed for random number generation
 
     u32 total = 0;
     for (int i = 0; i < 15; i++)
     {
         new_swarm->distribution[i] = (u32 *)malloc(sizeof(u32));
-        new_swarm->distribution[i][0] = (float)(rand()/RAND_MAX) * max; // Generate a random distribution probability
+        new_swarm->distribution[i][0] = ((double)rand() / RAND_MAX) * max; // Generate a random distribution probability
         total += new_swarm->distribution[i][0];
     }
 
     // Normalize the distribution probabilities to sum up to max
     for (int i = 0; i < 15; i++)
     {
-        new_swarm->distribution[i][0] = (new_swarm->distribution[i][0] * max) / total; //TODO verify math works correctly with u32
+        new_swarm->distribution[i][0] = (new_swarm->distribution[i][0] * max) / total; // TODO verify math works correctly with u32
     }
 
     return new_swarm;
@@ -85,7 +84,7 @@ void update_localbest(swarm **swarm_collection)
 {
     for (int i = 0; i < numswarms; i++)
     {
-        swarm* swarm = swarm_collection[i];
+        swarm *swarm = swarm_collection[i];
         if (swarm->score > swarm->bestscore)
         {
             swarm->bestscore = swarm->score;
@@ -99,11 +98,12 @@ void update_localbest(swarm **swarm_collection)
 
 void update_distribution(swarm **swarm_collection, u32 **global_best)
 {
-    for (int i = 0; i < numswarms; i++){
-        swarm* swarm = swarm_collection[i];
+    for (int i = 0; i < numswarms; i++)
+    {
+        swarm *swarm = swarm_collection[i];
         for (int i = 0; i < 15; i++)
         {
-            swarm->velocity[i][0] = (u32)(swarm->weights * swarm->velocity[i][0] + rand()/RAND_MAX * (swarm->localbest[i][0] - swarm->distribution[i][0]) + rand()/RAND_MAX * (global_best[i][0] - swarm->distribution[i][0]));
+            swarm->velocity[i][0] = (u32)(swarm->weights * swarm->velocity[i][0] + rand() / RAND_MAX * (swarm->localbest[i][0] - swarm->distribution[i][0]) + rand() / RAND_MAX * (global_best[i][0] - swarm->distribution[i][0]));
             swarm->distribution[i][0] += swarm->velocity[i][0];
         }
     }
