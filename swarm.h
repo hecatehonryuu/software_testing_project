@@ -16,8 +16,6 @@ typedef struct leswarm
 
     u8 bestscore;
 
-    float rand_displacement; /* random displacement between 0 and 1 */
-
     float weights; /* weight is a constant value */
 } swarm;
 
@@ -28,6 +26,8 @@ swarm **init_swarm_collection();
 
 /* Initialise a swarm struct with all variables*/
 swarm *init_swarm();
+
+void free_swarm_collection(swarm **swarm_collection);
 
 /* Essentially does the same thing as and replaces the switch part of original havoc stage
 Instead of a uniform distribution, it uses the provided swarm distribution to select mutation operators*/
@@ -40,10 +40,10 @@ swarm *compare_swarm(swarm **swarm_collection);
 void update_localbest(swarm **swarm_collection);
 
 /* update the velocity & distribution of every mutator in swarm */
-void update_distribution(swarm **swarm_collection);
+void update_distribution(swarm **swarm_collection, u32 **global_best);
 
 /* compare the localbest of all mutators in every swarm and update the global best with the localbest that has the highest score*/
-void update_globalbest(swarm **swarm_collection);
+void update_globalbest(swarm *best_swarm, swarm **swarm_collection, u32 **global_best);
 
 /* Optimise and Update distributions for all swarms
 Obtain gbest (distribution) by comparing swarms,

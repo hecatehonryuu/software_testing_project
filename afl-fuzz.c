@@ -88,6 +88,13 @@
 #  define EXP_ST static
 #endif /* ^AFL_LIB */
 
+/* Our constants and var*/
+//Testing
+u32 global_best[15];
+swarm **swarm_collection;
+swarm *best_swarm;
+int pilot_stage = 1;
+
 /* Lots of globals, but mostly for the status UI and other things where it
    really makes no sense to haul them around as function parameters. */
 
@@ -6163,7 +6170,9 @@ havoc_stage:
  
     for (i = 0; i < use_stacking; i++) {
 
-      switch (UR(15 + ((extras_cnt + a_extras_cnt) ? 2 : 0))) {
+      // switch (UR(15 + ((extras_cnt + a_extras_cnt) ? 2 : 0))) {
+      //testing
+      switch (swarm_havoc(best_swarm)) {
 
         case 0:
 
@@ -6694,6 +6703,7 @@ abandon_entry:
 /* Grab interesting test cases from other fuzzers. */
 
 static void sync_fuzzers(char** argv) {
+  //TODO edit to increment score of current best_swarm if interesting and is pilot_stage
 
   DIR* sd;
   struct dirent* sd_ent;
@@ -7776,7 +7786,7 @@ static void save_cmdline(u32 argc, char** argv) {
 
 /* Main entry point */
 
-int main123(int argc, char** argv) {
+int main1(int argc, char** argv) {
 
   s32 opt;
   u64 prev_queued = 0;
@@ -8088,7 +8098,14 @@ int main123(int argc, char** argv) {
     start_time += 4000;
     if (stop_soon) goto stop_fuzzing;
   }
+  printf("Entering testing\n");
+  //Testing
+  swarm_collection = init_swarm_collection();
+  //Testing
+  u8 pilot_fuzz_counter = 0;
+  u8 core_fuzz_counter = 100;
 
+  printf("Entering loop\n");
   while (1) {
 
     u8 skipped_fuzz;
@@ -8131,7 +8148,34 @@ int main123(int argc, char** argv) {
 
     }
 
-    skipped_fuzz = fuzz_one(use_argv);
+    // skipped_fuzz = fuzz_one(use_argv);
+
+    //Testing
+    //Pilot fuzzing over
+    if (pilot_fuzz_counter >= 150) {
+      core_fuzz_counter = 0;
+      pilot_fuzz_counter = 0;
+      //TODO optimisation stuff
+      pilot_stage = 0;
+    }
+
+    //core fuzzing
+    if (!pilot_stage && core_fuzz_counter < 100) {
+      skipped_fuzz = fuzz_one(use_argv);
+      core_fuzz_counter++;
+    } 
+    else {
+      pilot_stage = 1;
+    }
+
+    //pilot fuzzing
+    if (pilot_stage) {
+      u8 current_swarm = (u8)(pilot_fuzz_counter / 10);
+      best_swarm = swarm_collection[current_swarm];
+      skipped_fuzz = fuzz_one(use_argv);
+      pilot_fuzz_counter++;
+    }
+    //Testing
 
     if (!stop_soon && sync_id && !skipped_fuzz) {
       
@@ -8191,36 +8235,19 @@ stop_fuzzing:
 
   OKF("We're done here. Have a nice day!\n");
 
+  //Testing
+  free(best_swarm->distribution);
+  free(best_swarm);
+  //Testing
   exit(0);
 
 }
 
 int main(int argc, char** argv) {
-    swarm target;
-    u32 x = 100000000/10;
-    target.distribution = (u32**)malloc(15 * sizeof(u32*));
-    for (int i = 0; i < 15; i++) {
-        target.distribution[i] = (u32*)malloc(2 * sizeof(u32));
-        target.distribution[i][0] = x;
-    }
-
-    int** array = (int**)malloc(15 * sizeof(int*));
-    for (int i = 0; i < 15; i++) {
-        array[i] = (int*)malloc(2 * sizeof(int));
-        array[i][0] = 0;
-    }
-
-    for (int i = 0; i < 10000; i++) {
-        int mutoper = swarm_havoc(&target);
-        array[mutoper][0]++;
-    }
-    
-    for (int i = 0; i < 15; i++) {
-        printf("%d, ", array[i][0]);
-    }
-    printf("\n");
-
-    exit(0);
+  printf("Running test\n");
+  srand(100);
+  printf("%f\n", rand()/RAND_MAX);
+  swarm_collection = init_swarm_collection();
 }
 
 #endif /* !AFL_LIB */
