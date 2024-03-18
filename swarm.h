@@ -12,8 +12,6 @@ typedef struct leswarm
 
     u32 **velocity; /* an array storing the velocity of each mutator */
 
-    u32 **mutscore; /* an array storing the score of each mutator */
-
     u8 score; /* total score */
 
     u8 bestscore;
@@ -38,18 +36,11 @@ int swarm_havoc(swarm *target);
 /* Compares the score of swarms and returns best swarm*/
 swarm *compare_swarm(swarm **swarm_collection);
 
-/* check if new score is a new best score then update localbest distribution*/
-/* TODO: what if new score == best score ? do we still update the localbest distribution? erase this comment if this question is solved*/
-void update_localbest(swarm *swarm);
+/* check if new score is a new best score then update localbest distribution & best score*/
+void update_localbest(swarm **swarm_collection);
 
-/* check if new score is higher than best score, if it is then we update best score*/
-void update_bestscore(swarm *swarm);
-
-/* update the velocity of every mutator in swarm */
-void update_velocity(swarm *swarm);
-
-/* update the distribution probability of every mutator in swarm */
-void update_distribution(swarm *swarm);
+/* update the velocity & distribution of every mutator in swarm */
+void update_distribution(swarm **swarm_collection);
 
 /* compare the localbest of all mutators in every swarm and update the global best with the localbest that has the highest score*/
 void update_globalbest(swarm **swarm_collection);
