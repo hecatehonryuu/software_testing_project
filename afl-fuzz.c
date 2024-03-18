@@ -7132,7 +7132,6 @@ abandon_entry:
 
 static void sync_fuzzers(char **argv)
 {
-  // TODO edit to increment score of current best_swarm if interesting and is pilot_stage
 
   DIR *sd;
   struct dirent *sd_ent;
@@ -7252,7 +7251,14 @@ static void sync_fuzzers(char **argv)
           return;
 
         syncing_party = sd_ent->d_name;
-        queued_imported += save_if_interesting(argv, mem, st.st_size, fault);
+        // queued_imported += save_if_interesting(argv, mem, st.st_size, fault);
+        //Testing
+        int i = save_if_interesting(argv, mem, st.st_size, fault);
+        queued_imported += i;
+        if (pilot_stage && i) {
+          best_swarm->score++;   
+        }
+        //Testing
         syncing_party = 0;
 
         munmap(mem, st.st_size);
@@ -8698,12 +8704,18 @@ int main(int argc, char **argv)
 
     // Testing
     // Pilot fuzzing over
-    if (pilot_fuzz_counter >= 150)
+    if (pilot_fuzz_counter >= 100)
     {
+      // TODO optimisation stuff
       core_fuzz_counter = 0;
       pilot_fuzz_counter = 0;
-      // TODO optimisation stuff
+      for (u8 i = 0; i < 10; i++)
+      {
+        // printf("%d", swarm_collection[i]->score);
+        swarm_collection[i]->score = 0;        
+      }
       pilot_stage = 0;
+
     }
 
     // core fuzzing
@@ -8799,10 +8811,12 @@ stop_fuzzing:
   exit(0);
 }
 
-int main123(int argc, char **argv)
-{
-  printf("Running test\n");
-  swarm_collection = init_swarm_collection();
-}
+// int main(int argc, char **argv)
+// {
+//   printf("Running test\n");
+//   swarm_collection = init_swarm_collection();
+
+//   exit(0)
+// }
 
 #endif /* !AFL_LIB */
