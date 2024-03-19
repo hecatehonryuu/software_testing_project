@@ -1,9 +1,9 @@
-start_time        : 1710770468
-last_update       : 1710770653
-fuzzer_pid        : 274771
-cycles_done       : 312
-execs_done        : 81263
-execs_per_sec     : 57.47
+start_time        : 1710816436
+last_update       : 1710816471
+fuzzer_pid        : 587
+cycles_done       : 114
+execs_done        : 30488
+execs_per_sec     : 108.11
 paths_total       : 1
 paths_favored     : 1
 paths_found       : 0
@@ -20,8 +20,8 @@ unique_hangs      : 0
 last_path         : 0
 last_crash        : 0
 last_hang         : 0
-execs_since_crash : 81263
-exec_timeout      : 20
+execs_since_crash : 30488
+exec_timeout      : 40
 afl_banner        : test_basic_driver
 afl_version       : 2.57b
 target_mode       : default

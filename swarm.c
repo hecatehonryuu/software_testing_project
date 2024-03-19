@@ -10,10 +10,11 @@ const int numswarms = 10;
 
 swarm **init_swarm_collection()
 {
+    int seed = 123;
     swarm **swarm_collection = (swarm **)malloc(numswarms * sizeof(swarm *));
     for (int i = 0; i < numswarms; i++)
     {
-        swarm_collection[i] = init_swarm(i + 1); // Initialize each swarm in the collection
+        swarm_collection[i] = init_swarm(seed); // Initialize each swarm in the collection
     }
     return swarm_collection;
 }
@@ -115,11 +116,11 @@ void update_globalbest(swarm *best_swarm, swarm **swarm_collection, u32 **global
     global_best = best_swarm->localbest;
 }
 
-// void optimise(swarm *swarm)
-// {
-//     // TODO
-//     return NULL;
-// }
+void optimise(swarm **swarm_collection, u32 **global_best)
+{
+    update_globalbest(compare_swarm(swarm_collection), swarm_collection, global_best);
+    update_distribution(swarm_collection, global_best);
+}
 
 /*
 int main () {

@@ -48,7 +48,7 @@ void update_globalbest(swarm *best_swarm, swarm **swarm_collection, u32 **global
 /* Optimise and Update distributions for all swarms
 Obtain gbest (distribution) by comparing swarms,
 Updates velocity then updates distribution*/
-void optimise(swarm *swarm);
+void optimise(swarm **swarm_collection, u32 **global_best);
 
 /*TODO figure out how to store data from fuzzing to update scores*/
 
