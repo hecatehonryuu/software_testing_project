@@ -34,6 +34,8 @@ swarm *init_swarm(int seed)
     for (int i = 0; i < 15; i++)
     {
         new_swarm->distribution[i] = (u32 *)malloc(sizeof(u32));
+        new_swarm->localbest[i] = (u32 *)malloc(sizeof(u32));
+        new_swarm->velocity[i] = (u32 *)malloc(sizeof(u32));
         new_swarm->distribution[i][0] = ((double)rand() / RAND_MAX) * max; // Generate a random distribution probability
         total += new_swarm->distribution[i][0];
     }
@@ -45,6 +47,29 @@ swarm *init_swarm(int seed)
     }
 
     return new_swarm;
+}
+
+void free_swarm_collection(swarm **swarm_collection)
+{
+    for (int i = 0; i < numswarms; i++)
+    {
+        free_swarm(swarm_collection[i]);
+    }
+    free(swarm_collection);
+}
+
+void free_swarm(swarm *swarm)
+{
+    for (int i = 0; i < 15; i++)
+    {
+        free(swarm->distribution[i]);
+        free(swarm->localbest[i]);
+        free(swarm->velocity[i]);
+    }
+    free(swarm->distribution);
+    free(swarm->localbest);
+    free(swarm->velocity);
+    free(swarm);
 }
 
 int swarm_havoc(swarm *target)
@@ -63,22 +88,22 @@ int swarm_havoc(swarm *target)
     return -1;
 }
 
-swarm *compare_swarm(swarm **swarm_collection)
+void update_best_swarm(swarm **swarm_collection, swarm *best_swarm)
 {
     // initialize best_swarm to the first swarm in the collection
-    swarm *best_swarm = swarm_collection[0];
+    swarm *temp_swarm = swarm_collection[0];
 
     // iterate through all the swarms in swarm_collection and compare their scores
     // Update the best swarm if a higher score is found
     for (int i = 1; swarm_collection[i] != NULL; i++)
     {
-        if (swarm_collection[i]->bestscore > best_swarm->bestscore)
+        if (swarm_collection[i]->bestscore > temp_swarm->bestscore)
         {
-            best_swarm = swarm_collection[i];
+            temp_swarm = swarm_collection[i];
         }
     }
 
-    return best_swarm;
+    best_swarm = temp_swarm;
 }
 
 void update_localbest(swarm **swarm_collection)
@@ -97,8 +122,10 @@ void update_localbest(swarm **swarm_collection)
     }
 }
 
-void update_distribution(swarm **swarm_collection, u32 **global_best)
+void update_distribution(swarm **swarm_collection, swarm *best_swarm)
 {
+    u32** global_best = best_swarm->distribution;
+
     for (int i = 0; i < numswarms; i++)
     {
         swarm *swarm = swarm_collection[i];
@@ -108,18 +135,6 @@ void update_distribution(swarm **swarm_collection, u32 **global_best)
             swarm->distribution[i][0] += swarm->velocity[i][0];
         }
     }
-}
-
-void update_globalbest(swarm *best_swarm, swarm **swarm_collection, u32 **global_best)
-{
-    best_swarm = compare_swarm(swarm_collection);
-    global_best = best_swarm->localbest;
-}
-
-void optimise(swarm **swarm_collection, u32 **global_best)
-{
-    update_globalbest(compare_swarm(swarm_collection), swarm_collection, global_best);
-    update_distribution(swarm_collection, global_best);
 }
 
 /*

@@ -90,7 +90,6 @@
 
 /* Our constants and var*/
 // Testing
-u32 global_best[15];
 swarm **swarm_collection;
 swarm *best_swarm;
 int pilot_stage = 1;
@@ -8653,7 +8652,7 @@ int main(int argc, char **argv)
   while (1)
   {
 
-    u8 skipped_fuzz;
+    u8 skipped_fuzz = 0;
 
     cull_queue();
 
@@ -8703,19 +8702,14 @@ int main(int argc, char **argv)
     // skipped_fuzz = fuzz_one(use_argv);
 
     // Testing
-    // Pilot fuzzing over
+    // Pilot fuzzing over, reset cycle
     if (pilot_fuzz_counter >= 100)
     {
-      // TODO optimisation stuff
+      update_localbest(swarm_collection);
+      update_best_swarm(swarm_collection, best_swarm);
       core_fuzz_counter = 0;
       pilot_fuzz_counter = 0;
-      for (u8 i = 0; i < 10; i++)
-      {
-        // printf("%d", swarm_collection[i]->score);
-        swarm_collection[i]->score = 0;        
-      }
       pilot_stage = 0;
-
     }
 
     // core fuzzing
@@ -8724,13 +8718,16 @@ int main(int argc, char **argv)
       skipped_fuzz = fuzz_one(use_argv);
       core_fuzz_counter++;
     }
-    else
+    else if (!pilot_stage) //Optimisation
     {
       pilot_stage = 1;
-    }
-
-    // pilot fuzzing
-    if (pilot_stage)
+      update_distribution(swarm_collection, best_swarm);
+      for (u8 i = 0; i < 10; i++)
+      {
+        swarm_collection[i]->score = 0;        
+      }
+    } 
+    else //Pilot fuzzing
     {
       u8 current_swarm = (u8)(pilot_fuzz_counter / 10);
       best_swarm = swarm_collection[current_swarm];
@@ -8805,8 +8802,7 @@ stop_fuzzing:
   OKF("We're done here. Have a nice day!\n");
 
   // Testing
-  free(best_swarm->distribution);
-  free(best_swarm);
+  free_swarm_collection(swarm_collection);
   // Testing
   exit(0);
 }
