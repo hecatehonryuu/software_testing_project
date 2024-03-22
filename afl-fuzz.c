@@ -90,6 +90,8 @@
 /* Lots of globals, but mostly for the status UI and other things where it
    really makes no sense to haul them around as function parameters. */
 
+u64 time_limit = 0;
+
 
 EXP_ST u8 *in_dir,                    /* Input directory with test cases  */
           *out_file,                  /* File to fuzz, if any             */
@@ -4059,6 +4061,11 @@ static void show_stats(void) {
           " (%s)",  crash_mode ? cPIN "peruvian were-rabbit" : 
           cYEL "american fuzzy lop", use_banner);
 
+  
+  //Testing
+  if (time_limit){
+    SAYF("\nCutoff time limit: %lld min\n", time_limit);
+  }
   SAYF("\n%s\n\n", tmp);
 
   /* "Handy" shortcuts for drawing boxes... */
@@ -7795,7 +7802,7 @@ int main(int argc, char** argv) {
   gettimeofday(&tv, &tz);
   srandom(tv.tv_sec ^ tv.tv_usec ^ getpid());
 
-  while ((opt = getopt(argc, argv, "+i:o:f:m:b:t:T:dnCB:S:M:x:QV")) > 0)
+  while ((opt = getopt(argc, argv, "+i:o:f:m:b:t:T:dnCB:S:M:x:QVL:")) > 0)
 
     switch (opt) {
 
@@ -7812,6 +7819,11 @@ int main(int argc, char** argv) {
 
         if (out_dir) FATAL("Multiple -o options not supported");
         out_dir = optarg;
+        break;
+
+      case 'L': /*Timer cutoff*/
+        if (time_limit) FATAL("Multiple -L options not supported");
+        time_limit = atoi(optarg);
         break;
 
       case 'M': { /* master sync ID */
@@ -8131,6 +8143,13 @@ int main(int argc, char** argv) {
     }
 
     skipped_fuzz = fuzz_one(use_argv);
+
+    // Testing
+    //Timeout
+    if (time_limit && get_cur_time() - start_time > time_limit * 60 * 1000)
+    {
+      stop_soon = 2;
+    }
 
     if (!stop_soon && sync_id && !skipped_fuzz) {
       
