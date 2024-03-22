@@ -93,6 +93,7 @@
 swarm **swarm_collection;
 swarm *best_swarm;
 int pilot_stage = 1;
+u64 time_limit;
 
 /* Lots of globals, but mostly for the status UI and other things where it
    really makes no sense to haul them around as function parameters. */
@@ -4272,7 +4273,11 @@ static void show_stats(void)
   banner_pad = (80 - banner_len) / 2;
   memset(tmp, ' ', banner_pad);
 
-  sprintf(tmp + banner_pad, "%s " cLCY VERSION cLGN " (%s)", crash_mode ? cPIN "peruvian were-rabbit" : cYEL "american fuzzy lop", use_banner);
+  sprintf(tmp + banner_pad, "%s " cLCY VERSION cLGN " (%s)", crash_mode ? cPIN "peruvian were-rabbit" : cYEL "american fuzzy lop editted", use_banner);
+  //Testing
+  if (time_limit){
+    SAYF("\nCutoff time limit: %lld min\n", time_limit);
+  }
 
   SAYF("\n%s\n\n", tmp);
 
@@ -5078,7 +5083,7 @@ static u32 calculate_score(struct queue_entry *q)
 
   if (perf_score > HAVOC_MAX_MULT * 100)
     perf_score = HAVOC_MAX_MULT * 100;
-
+    
   return perf_score;
 }
 
@@ -8294,7 +8299,7 @@ int main(int argc, char **argv)
   gettimeofday(&tv, &tz);
   srandom(tv.tv_sec ^ tv.tv_usec ^ getpid());
 
-  while ((opt = getopt(argc, argv, "+i:o:f:m:b:t:T:dnCB:S:M:x:QV")) > 0)
+  while ((opt = getopt(argc, argv, "+i:o:f:m:b:t:T:dnCB:S:M:x:QV:L:")) > 0)
 
     switch (opt)
     {
@@ -8315,6 +8320,11 @@ int main(int argc, char **argv)
       if (out_dir)
         FATAL("Multiple -o options not supported");
       out_dir = optarg;
+      break;
+
+    //testing
+    case 'L': /*Add time limit to terminate program*/
+      time_limit = atoi(optarg);
       break;
 
     case 'M':
@@ -8641,14 +8651,12 @@ int main(int argc, char **argv)
     if (stop_soon)
       goto stop_fuzzing;
   }
-  printf("Entering testing\n");
   // Testing
   swarm_collection = init_swarm_collection();
-  // Testing
   u8 pilot_fuzz_counter = 0;
   u8 core_fuzz_counter = 100;
+  // Testing
 
-  printf("Entering loop\n");
   while (1)
   {
 
@@ -8726,13 +8734,20 @@ int main(int argc, char **argv)
       {
         swarm_collection[i]->score = 0;        
       }
-    } 
-    else //Pilot fuzzing
+    }
+
+    if (pilot_stage) //Pilot fuzzing
     {
       u8 current_swarm = (u8)(pilot_fuzz_counter / 10);
       best_swarm = swarm_collection[current_swarm];
       skipped_fuzz = fuzz_one(use_argv);
       pilot_fuzz_counter++;
+    }
+
+    //Timeout
+    if (time_limit && get_cur_time() - start_time > time_limit * 60 * 1000)
+    {
+      stop_soon = 2;
     }
     // Testing
 
