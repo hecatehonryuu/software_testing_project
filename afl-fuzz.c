@@ -8710,7 +8710,7 @@ int main(int argc, char **argv)
     // skipped_fuzz = fuzz_one(use_argv);
 
     // Testing
-    // Pilot fuzzing over, reset cycle
+    // Pilot fuzzing over, calculate all variables from data gathered in pilot fuzzing, reset cycle
     if (pilot_fuzz_counter >= 100)
     {
       update_localbest(swarm_collection);
@@ -8720,13 +8720,13 @@ int main(int argc, char **argv)
       pilot_stage = 0;
     }
 
-    // core fuzzing
+    // core fuzzing with best swarm identified above
     if (!pilot_stage && core_fuzz_counter < 100)
     {
       skipped_fuzz = fuzz_one(use_argv);
       core_fuzz_counter++;
     }
-    else if (!pilot_stage) //Optimisation
+    else if (!pilot_stage) //Optimisation to update all swarm distributions AFTER core fuzzing
     {
       pilot_stage = 1;
       update_distribution(swarm_collection, best_swarm);
