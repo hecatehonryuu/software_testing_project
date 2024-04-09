@@ -4065,7 +4065,7 @@ static void show_stats(void) {
   
   //Testing
   if (time_limit){
-    SAYF("\nCutoff time limit: %lld min\n", time_limit);
+    SAYF("\nCutoff time limit: %lld min\n", time_limit / 60);
   }
   if (cycle_limit){
     SAYF("\nCutoff at max cycles: %lld \n", cycle_limit);
@@ -6863,7 +6863,10 @@ static void handle_skipreq(int sig) {
 
 static void handle_timeout(int sig) {
 
-  if (child_pid > 0) {
+  if (get_cur_time - start_time >= time_limit) {
+      SAYF(cLRD "\n+++ Time Limit Reached +++\n" cRST);
+      stop_soon = 1;
+  } else if (child_pid > 0) {
 
     child_timed_out = 1; 
     kill(child_pid, SIGKILL);
@@ -7827,11 +7830,11 @@ int main(int argc, char** argv) {
 
       case 'L': /*Timer cutoff*/
         if (time_limit) FATAL("Multiple -L options not supported");
-        time_limit = atoi(optarg);
+        time_limit = atoi(optarg) * 60;
         break;
 
       case 'C': /*Max cycle cutoff*/
-        if (time_limit) FATAL("Multiple -C options not supported");
+        if (cycle_limit) FATAL("Multiple -C options not supported");
         cycle_limit = atoi(optarg);
         break;
 
@@ -8082,6 +8085,9 @@ int main(int argc, char** argv) {
   check_binary(argv[optind]);
 
   start_time = get_cur_time();
+  if (time_limit) {
+      alarm(time_limit);
+  }
 
   if (qemu_mode)
     use_argv = get_qemu_argv(argv[0], argv + optind, argc - optind);
@@ -8154,11 +8160,7 @@ int main(int argc, char** argv) {
     skipped_fuzz = fuzz_one(use_argv);
 
     // Testing
-    //Timeout
-    if (time_limit && get_cur_time() - start_time > time_limit * 60 * 1000)
-    {
-      stop_soon = 2;
-    }
+    //Cycle check
 
     if (cycle_limit && queue_cycle >= cycle_limit)
     {
