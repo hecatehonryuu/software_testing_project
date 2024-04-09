@@ -6863,7 +6863,7 @@ static void handle_skipreq(int sig) {
 
 static void handle_timeout(int sig) {
 
-  if (get_cur_time - start_time >= time_limit) {
+  if ((get_cur_time() - start_time) >= time_limit) {
       SAYF(cLRD "\n+++ Time Limit Reached +++\n" cRST);
       stop_soon = 1;
   } else if (child_pid > 0) {
@@ -7809,7 +7809,7 @@ int main(int argc, char** argv) {
   gettimeofday(&tv, &tz);
   srandom(tv.tv_sec ^ tv.tv_usec ^ getpid());
 
-  while ((opt = getopt(argc, argv, "+i:o:f:m:b:t:T:dnCB:S:M:x:QVL:C:")) > 0)
+  while ((opt = getopt(argc, argv, "+i:o:f:m:b:t:T:dnCB:S:M:x:QVL:F:")) > 0)
 
     switch (opt) {
 
@@ -7833,8 +7833,8 @@ int main(int argc, char** argv) {
         time_limit = atoi(optarg) * 60;
         break;
 
-      case 'C': /*Max cycle cutoff*/
-        if (cycle_limit) FATAL("Multiple -C options not supported");
+      case 'F': /*Max cycle cutoff*/
+        if (cycle_limit) FATAL("Multiple -F options not supported");
         cycle_limit = atoi(optarg);
         break;
 
