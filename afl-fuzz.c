@@ -6863,7 +6863,7 @@ static void handle_skipreq(int sig) {
 
 static void handle_timeout(int sig) {
 
-  if ((get_cur_time() - start_time) >= time_limit) {
+  if ((get_cur_time() - start_time) >= time_limit * 1000) {
       SAYF(cLRD "\n+++ Time Limit Reached +++\n" cRST);
       stop_soon = 1;
   } else if (child_pid > 0) {
@@ -8086,7 +8086,12 @@ int main(int argc, char** argv) {
 
   start_time = get_cur_time();
   if (time_limit) {
-      alarm(time_limit);
+    struct itimerval timer;
+    timer.it_value.tv_sec = time_limit * 60;
+    timer.it_value.tv_usec = 0;
+    timer.it_interval.tv_sec = 5;
+    timer.it_interval.tv_usec = 0;
+    setitimer(ITIMER_REAL, &timer, NULL);
   }
 
   if (qemu_mode)
