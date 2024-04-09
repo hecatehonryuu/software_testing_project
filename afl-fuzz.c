@@ -91,6 +91,7 @@
    really makes no sense to haul them around as function parameters. */
 
 u64 time_limit = 0;
+u64 cycle_limit = 0;
 
 
 EXP_ST u8 *in_dir,                    /* Input directory with test cases  */
@@ -4066,6 +4067,9 @@ static void show_stats(void) {
   if (time_limit){
     SAYF("\nCutoff time limit: %lld min\n", time_limit);
   }
+  if (cycle_limit){
+    SAYF("\nCutoff at max cycles: %lld \n", cycle_limit);
+  }
   SAYF("\n%s\n\n", tmp);
 
   /* "Handy" shortcuts for drawing boxes... */
@@ -7802,7 +7806,7 @@ int main(int argc, char** argv) {
   gettimeofday(&tv, &tz);
   srandom(tv.tv_sec ^ tv.tv_usec ^ getpid());
 
-  while ((opt = getopt(argc, argv, "+i:o:f:m:b:t:T:dnCB:S:M:x:QVL:")) > 0)
+  while ((opt = getopt(argc, argv, "+i:o:f:m:b:t:T:dnCB:S:M:x:QVL:C:")) > 0)
 
     switch (opt) {
 
@@ -7824,6 +7828,11 @@ int main(int argc, char** argv) {
       case 'L': /*Timer cutoff*/
         if (time_limit) FATAL("Multiple -L options not supported");
         time_limit = atoi(optarg);
+        break;
+
+      case 'C': /*Max cycle cutoff*/
+        if (time_limit) FATAL("Multiple -C options not supported");
+        cycle_limit = atoi(optarg);
         break;
 
       case 'M': { /* master sync ID */
@@ -8147,6 +8156,11 @@ int main(int argc, char** argv) {
     // Testing
     //Timeout
     if (time_limit && get_cur_time() - start_time > time_limit * 60 * 1000)
+    {
+      stop_soon = 2;
+    }
+
+    if (cycle_limit && queue_cycle >= cycle_limit)
     {
       stop_soon = 2;
     }
