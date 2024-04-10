@@ -6167,6 +6167,11 @@ havoc_stage:
 
   for (stage_cur = 0; stage_cur < stage_max; stage_cur++) {
 
+    if ((get_cur_time() - start_time) >= time_limit * 1000) {
+        SAYF(cLRD "\n+++ Time Limit Reached +++\n" cRST);
+        stop_soon = 1;
+    }
+
     u32 use_stacking = 1 << (1 + UR(HAVOC_STACK_POW2));
 
     stage_cur_val = use_stacking;
@@ -6863,11 +6868,12 @@ static void handle_skipreq(int sig) {
 
 static void handle_timeout(int sig) {
 
-  if ((get_cur_time() - start_time) >= time_limit * 1000) {
-      SAYF(cLRD "\n+++ Time Limit Reached +++\n" cRST);
-      stop_soon = 1;
-  } else if (child_pid > 0) {
+  // if ((get_cur_time() - start_time) >= time_limit * 1000) {
+  //     SAYF(cLRD "\n+++ Time Limit Reached +++\n" cRST);
+  //     stop_soon = 1;
+  // } else if (child_pid > 0) {
 
+  if (child_pid > 0) {
     child_timed_out = 1; 
     kill(child_pid, SIGKILL);
 
@@ -8085,14 +8091,14 @@ int main(int argc, char** argv) {
   check_binary(argv[optind]);
 
   start_time = get_cur_time();
-  if (time_limit) {
-    struct itimerval timer;
-    timer.it_value.tv_sec = time_limit * 60;
-    timer.it_value.tv_usec = 0;
-    timer.it_interval.tv_sec = 5;
-    timer.it_interval.tv_usec = 0;
-    setitimer(ITIMER_REAL, &timer, NULL);
-  }
+  // if (time_limit) {
+  //   struct itimerval timer;
+  //   timer.it_value.tv_sec = time_limit;
+  //   timer.it_value.tv_usec = 0;
+  //   timer.it_interval.tv_sec = 5;
+  //   timer.it_interval.tv_usec = 0;
+  //   setitimer(ITIMER_REAL, &timer, NULL);
+  // }
 
   if (qemu_mode)
     use_argv = get_qemu_argv(argv[0], argv + optind, argc - optind);
