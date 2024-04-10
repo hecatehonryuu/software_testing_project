@@ -93,7 +93,8 @@
 swarm **swarm_collection;
 swarm *best_swarm;
 int pilot_stage = 1;
-u64 time_limit;
+u64 time_limit = 0;
+u64 cycle_limit = 0;
 
 /*Declarations - A*/
 #define NUM_BUCKETS 5
@@ -4494,7 +4495,10 @@ static void show_stats(void)
   sprintf(tmp + banner_pad, "%s " cLCY VERSION cLGN " (%s)", crash_mode ? cPIN "peruvian were-rabbit" : cYEL "american fuzzy lop editted", use_banner);
   //Testing
   if (time_limit){
-    SAYF("\nCutoff time limit: %lld min\n", time_limit);
+    SAYF("\nCutoff time limit: %lld min\n", time_limit / 60);
+  }
+  if (cycle_limit){
+    SAYF("\nMax Cycle cutoff: %lld \n", cycle_limit);
   }
 
   SAYF("\n%s\n\n", tmp);
@@ -6772,6 +6776,11 @@ havoc_stage:
 
   for (stage_cur = 0; stage_cur < stage_max; stage_cur++)
   {
+    
+    if (time_limit && get_cur_time() - start_time > time_limit * 1000)
+    {
+      stop_soon = 2;
+    }
 
     u32 use_stacking = 1 << (1 + UR(HAVOC_STACK_POW2));
 
@@ -8529,7 +8538,7 @@ int main(int argc, char **argv)
   gettimeofday(&tv, &tz);
   srandom(tv.tv_sec ^ tv.tv_usec ^ getpid());
 
-  while ((opt = getopt(argc, argv, "+i:o:f:m:b:t:T:dnCB:S:M:x:QVL:")) > 0)
+  while ((opt = getopt(argc, argv, "+i:o:f:m:b:t:T:dnCB:S:M:x:QVL:F:")) > 0)
 
     switch (opt)
     {
@@ -8554,7 +8563,11 @@ int main(int argc, char **argv)
 
     //testing
     case 'L': /*Add time limit to terminate program*/
-      time_limit = atoi(optarg);
+      time_limit = atoi(optarg) * 60;
+      break;
+
+    case 'F': /*Add time limit to terminate program*/
+      cycle_limit = atoi(optarg);
       break;
 
     case 'M':
@@ -8975,7 +8988,7 @@ int main(int argc, char **argv)
     }
 
     //Timeout
-    if (time_limit && get_cur_time() - start_time > time_limit * 60 * 1000)
+    if (cycle_limit && queue_cycle >= cycle_limit)
     {
       stop_soon = 2;
     }
