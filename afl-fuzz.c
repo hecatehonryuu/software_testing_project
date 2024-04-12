@@ -93,7 +93,6 @@
 swarm **swarm_collection;
 swarm *best_swarm;
 int pilot_stage = 1;
-u64 time_limit;
 
 /* Lots of globals, but mostly for the status UI and other things where it
    really makes no sense to haul them around as function parameters. */
@@ -4278,10 +4277,6 @@ static void show_stats(void)
   memset(tmp, ' ', banner_pad);
 
   sprintf(tmp + banner_pad, "%s " cLCY VERSION cLGN " (%s)", crash_mode ? cPIN "peruvian were-rabbit" : cYEL "american fuzzy lop editted", use_banner);
-  //Testing
-  if (time_limit){
-    SAYF("\nCutoff time limit: %lld min\n", time_limit);
-  }
 
   
   //Testing
@@ -6567,7 +6562,7 @@ havoc_stage:
   for (stage_cur = 0; stage_cur < stage_max; stage_cur++)
   {
 
-    if ((get_cur_time() - start_time) >= time_limit * 1000) {
+    if (time_limit && (get_cur_time() - start_time) >= time_limit * 1000) {
         SAYF(cLRD "\n+++ Time Limit Reached +++\n" cRST);
         stop_soon = 1;
     }
@@ -8776,16 +8771,6 @@ int main(int argc, char **argv)
       pilot_fuzz_counter++;
     }
 
-    //Timeout
-    if (time_limit && get_cur_time() - start_time > time_limit * 60 * 1000)
-    {
-      stop_soon = 2;
-    }
-    // Testing
-
-    if (!stop_soon && sync_id && !skipped_fuzz)
-    {
-
     // Testing
     //Cycle check
 
@@ -8862,7 +8847,6 @@ stop_fuzzing:
   // Testing
   exit(0);
 
-}
 }
 
 // int main(int argc, char **argv)
