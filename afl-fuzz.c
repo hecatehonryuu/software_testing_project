@@ -8351,11 +8351,6 @@ int main(int argc, char **argv)
       out_dir = optarg;
       break;
 
-    //testing
-    case 'L': /*Add time limit to terminate program*/
-      time_limit = atoi(optarg);
-      break;
-
     case 'M':
     { /* master sync ID */
 
