@@ -8861,6 +8861,8 @@ stop_fuzzing:
   free_swarm_collection(swarm_collection);
   // Testing
   exit(0);
+
+}
 }
 
 // int main(int argc, char **argv)
