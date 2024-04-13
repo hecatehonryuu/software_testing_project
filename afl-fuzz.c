@@ -4277,7 +4277,7 @@ static void show_stats(void)
   sprintf(tmp + banner_pad, "%s " cLCY VERSION cLGN " (%s)", crash_mode ? cPIN "peruvian were-rabbit" : cYEL "american fuzzy lop editted", use_banner);
   //Testing
   if (time_limit){
-    SAYF("\nCutoff time limit: %lld min\n", time_limit);
+    SAYF("\nCutoff time limit: %lld min\n", time_limit/60);
   }
   if (cycle_limit){
     SAYF("\nMax cycles cutoff: %lld \n", cycle_limit);
